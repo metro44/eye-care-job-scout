@@ -39,15 +39,15 @@ export default function LocationSelector({ onLocationSelect }: LocationSelectorP
 
   return (
     <div className="glass rounded-xl p-4 sm:p-6 shadow-xl">
-      <div className="text-center mb-4 sm:mb-6">
-        <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">Find Eye Care Facilities</h2>
-        <p className="text-[#B0A6A7] text-sm sm:text-base">Select a location to discover hospitals and clinics</p>
-      </div>
+              <div className="text-center mb-4 sm:mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">Find Eye Care Facilities</h2>
+          <p className="text-[#C0C8CA] text-sm sm:text-base">Select a location to discover hospitals and clinics</p>
+        </div>
 
       <div className="space-y-4">
         {/* Quick Select Dropdown */}
         <div className="relative">
-          <label className="block text-sm font-medium text-[#B0A6A7] mb-2">
+          <label className="block text-sm font-medium text-[#C0C8CA] mb-2">
             Quick Select Major Cities
           </label>
           <div className="relative">
@@ -56,27 +56,27 @@ export default function LocationSelector({ onLocationSelect }: LocationSelectorP
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               className="w-full input-field flex items-center justify-between cursor-pointer"
             >
-              <span className={selectedLocation ? 'text-[#30333A]' : 'text-[#72676F]'}>
+              <span className={selectedLocation ? 'text-[#1A2D42]' : 'text-[#2E4156]'}>
                 {selectedLocation || 'Choose a major city...'}
               </span>
               <ChevronDown 
-                className={`w-5 h-5 text-[#72676F] transition-transform duration-200 ${
+                className={`w-5 h-5 text-[#2E4156] transition-transform duration-200 ${
                   isDropdownOpen ? 'rotate-180' : ''
                 }`} 
               />
             </button>
 
             {isDropdownOpen && (
-              <div className="absolute z-10 w-full mt-1 glass-dark rounded-lg shadow-xl border border-[#B0A6A7]/20 max-h-60 overflow-y-auto">
+              <div className="absolute z-10 w-full mt-1 glass-dark rounded-lg shadow-xl border border-[#C0C8CA]/20 max-h-48 sm:max-h-60 overflow-y-auto">
                 {MAJOR_CITIES.map((city) => (
                   <button
                     key={city}
                     onClick={() => handleLocationSelect(city)}
-                    className="w-full px-4 py-3 text-left text-[#B0A6A7] hover:bg-[#72676F]/20 hover:text-white transition-colors duration-200 first:rounded-t-lg last:rounded-b-lg"
+                    className="w-full px-4 py-3 text-left text-[#C0C8CA] hover:bg-[#2E4156]/20 hover:text-white transition-colors duration-200 first:rounded-t-lg last:rounded-b-lg border-b border-[#C0C8CA]/10 last:border-b-0"
                   >
                     <div className="flex items-center space-x-3">
-                      <MapPin className="w-4 h-4" />
-                      <span>{city}</span>
+                      <MapPin className="w-4 h-4 flex-shrink-0" />
+                      <span className="truncate">{city}</span>
                     </div>
                   </button>
                 ))}
@@ -88,21 +88,21 @@ export default function LocationSelector({ onLocationSelect }: LocationSelectorP
         {/* Divider */}
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-[#B0A6A7]/20"></div>
+            <div className="w-full border-t border-[#C0C8CA]/20"></div>
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-[#30333A] text-[#B0A6A7]">or</span>
+            <span className="px-2 bg-[#1A2D42] text-[#C0C8CA]">or</span>
           </div>
         </div>
 
         {/* Custom Location Input */}
         <div>
-          <label className="block text-sm font-medium text-[#B0A6A7] mb-2">
+          <label className="block text-sm font-medium text-[#C0C8CA] mb-2">
             Search Any Location
           </label>
           <form onSubmit={handleCustomLocationSubmit} className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#72676F]" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#2E4156]" />
               <input
                 type="text"
                 value={customLocation}
@@ -123,10 +123,10 @@ export default function LocationSelector({ onLocationSelect }: LocationSelectorP
 
         {/* Selected Location Display */}
         {selectedLocation && (
-          <div className="mt-4 p-4 bg-gradient-warm rounded-lg border border-[#B0A6A7]/30">
+          <div className="mt-4 p-4 bg-gradient-warm rounded-lg border border-[#C0C8CA]/30">
             <div className="flex items-center space-x-2">
-              <MapPin className="w-5 h-5 text-[#30333A]" />
-              <span className="font-medium text-[#30333A]">Selected: {selectedLocation}</span>
+              <MapPin className="w-5 h-5 text-[#1A2D42] flex-shrink-0" />
+              <span className="font-medium text-[#1A2D42] truncate">Selected: {selectedLocation}</span>
             </div>
           </div>
         )}

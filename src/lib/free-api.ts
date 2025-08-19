@@ -235,16 +235,12 @@ export const osmAPI = {
   // Search for eye care facilities using multiple strategies
   async searchEyeCareFacilities(filters: SearchFilters): Promise<EyeCareFacility[]> {
     try {
-      // First, try to get real facility data for the location
       const locationKey = filters.location.toLowerCase().split(',')[0].trim();
       const realFacilities = REAL_FACILITIES[locationKey] || [];
       
-      if (realFacilities.length > 0) {
-        console.log(`Found ${realFacilities.length} real facilities for ${locationKey}`);
-        return realFacilities;
-      }
+      console.log(`Found ${realFacilities.length} real facilities for ${locationKey}`);
 
-      // If no real data, try OSM API with multiple search strategies
+      // Try OSM API with multiple search strategies first
       const searchQueries = [
         `hospital ${filters.location}`,
         `clinic ${filters.location}`,
@@ -292,8 +288,10 @@ export const osmAPI = {
         index === self.findIndex(p => p.place_id === place.place_id)
       );
 
+      let osmResults: EyeCareFacility[] = [];
+      
       if (uniqueResults.length > 0) {
-        return uniqueResults
+        osmResults = uniqueResults
           .filter((place: OSMPlace) => {
             // More lenient filtering for medical/healthcare facilities
             const tags: OSMExtratags = place.extratags || {};
@@ -331,25 +329,36 @@ export const osmAPI = {
             return isMedical || hasMedicalKeywords;
           })
           .map((place: OSMPlace) => this.transformOSMPlace(place))
-          .slice(0, 20); // Limit to 20 results
+          .slice(0, 15); // Limit OSM results to 15 to leave room for real facilities
       }
 
-      // If no OSM results, return facilities from nearby cities
-      const nearbyCities = Object.keys(REAL_FACILITIES);
-      const nearbyFacilities: EyeCareFacility[] = [];
+      // Combine OSM results with real facilities, prioritizing real facilities
+      const combinedResults = [...realFacilities, ...osmResults];
       
-      for (const city of nearbyCities) {
-        if (city !== locationKey) {
-          nearbyFacilities.push(...REAL_FACILITIES[city]);
+      // Remove duplicates based on exact name match only
+      const uniqueCombinedResults = combinedResults.filter((facility, index, self) => 
+        index === self.findIndex(f => f.name.toLowerCase() === facility.name.toLowerCase())
+      );
+
+      // If no OSM results and no real facilities, return facilities from nearby cities
+      if (osmResults.length === 0 && realFacilities.length === 0) {
+        const nearbyCities = Object.keys(REAL_FACILITIES);
+        const nearbyFacilities: EyeCareFacility[] = [];
+        
+        for (const city of nearbyCities) {
+          if (city !== locationKey) {
+            nearbyFacilities.push(...REAL_FACILITIES[city]);
+          }
+        }
+
+        if (nearbyFacilities.length > 0) {
+          console.log(`No facilities found in ${locationKey}, showing nearby cities`);
+          return nearbyFacilities.slice(0, 10);
         }
       }
 
-      if (nearbyFacilities.length > 0) {
-        console.log(`No facilities found in ${locationKey}, showing nearby cities`);
-        return nearbyFacilities.slice(0, 10);
-      }
-
-      return [];
+      console.log(`Returning ${uniqueCombinedResults.length} total facilities (${realFacilities.length} real + ${osmResults.length} OSM)`);
+      return uniqueCombinedResults.slice(0, 25); // Return up to 25 total results
     } catch (error) {
       console.error('Error searching facilities:', error);
       

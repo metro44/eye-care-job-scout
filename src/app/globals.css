@@ -1,11 +1,11 @@
 /* Custom color palette */
 :root {
-  --color-primary: #30333A;    /* Dark charcoal */
-  --color-secondary: #72676F;  /* Muted purple-gray */
-  --color-accent: #9A8D96;     /* Soft lavender */
-  --color-light: #B0A6A7;      /* Light gray-pink */
-  --color-warm: #B79D9B;       /* Warm beige-pink */
-  --color-dark: #51403D;       /* Deep brown */
+  --color-primary: #1A2D42;    /* Dark blue */
+  --color-secondary: #2E4156;  /* Medium blue */
+  --color-accent: #AAB7B7;     /* Light gray-blue */
+  --color-light: #C0C8CA;      /* Very light gray */
+  --color-warm: #D4D8DD;       /* Off-white */
+  --color-dark: #1A2D42;       /* Same as primary for consistency */
 }
 
 * {
@@ -91,7 +91,7 @@ body {
 /* Input styles */
 .input-field {
   background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(176, 166, 167, 0.3);
+  border: 1px solid rgba(192, 200, 202, 0.3);
   border-radius: 0.5rem;
   padding: 0.75rem 1rem;
   color: var(--color-primary);
@@ -107,12 +107,12 @@ body {
 .input-field:focus {
   outline: none;
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 2px rgba(154, 141, 150, 0.2);
+  box-shadow: 0 0 0 2px rgba(170, 183, 183, 0.2);
 }
 
 /* Modal styles */
 .modal-overlay {
-  background: rgba(48, 51, 58, 0.8);
+  background: rgba(26, 45, 66, 0.8);
   backdrop-filter: blur(10px);
   position: fixed;
   top: 0;
@@ -128,7 +128,7 @@ body {
 
 .modal-content {
   background: rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(176, 166, 167, 0.3);
+  border: 1px solid rgba(192, 200, 202, 0.3);
   border-radius: 0.75rem;
   box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
   max-width: 90vw;
@@ -141,14 +141,14 @@ body {
 .glass {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(176, 166, 167, 0.2);
+  border: 1px solid rgba(192, 200, 202, 0.2);
   border-radius: 0.75rem;
 }
 
 .glass-dark {
-  background: rgba(48, 51, 58, 0.9);
+  background: rgba(26, 45, 66, 0.9);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(176, 166, 167, 0.1);
+  border: 1px solid rgba(192, 200, 202, 0.1);
   border-radius: 0.75rem;
 }
 
