@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { EyeCareFacility, SearchFilters, EnquiryData, GeminiEnquiryResponse } from '@/types';
+import { EyeCareFacility, SearchFilters, EnquiryData, GeminiEnquiryResponse, OSMPlace, OSMAddress, OSMExtratags, OpeningHours, OverpassElement, OverpassResponse } from '@/types';
 
 // Real facility data for major cities (this is real data, not mock)
 const REAL_FACILITIES: { [key: string]: EyeCareFacility[] } = {
@@ -255,7 +255,7 @@ export const osmAPI = {
         `healthcare ${filters.location}`,
       ];
 
-      let allResults: any[] = [];
+      let allResults: OSMPlace[] = [];
 
       // Search with multiple queries to get comprehensive results
       for (const query of searchQueries) {
@@ -294,10 +294,10 @@ export const osmAPI = {
 
       if (uniqueResults.length > 0) {
         return uniqueResults
-          .filter((place: any) => {
+          .filter((place: OSMPlace) => {
             // More lenient filtering for medical/healthcare facilities
-            const tags = place.extratags || {};
-            const address = place.address || {};
+            const tags: OSMExtratags = place.extratags || {};
+            const address: OSMAddress = place.address || {};
             const name = (place.name || '').toLowerCase();
             const displayName = (place.display_name || '').toLowerCase();
             
@@ -330,7 +330,7 @@ export const osmAPI = {
 
             return isMedical || hasMedicalKeywords;
           })
-          .map((place: any) => this.transformOSMPlace(place))
+          .map((place: OSMPlace) => this.transformOSMPlace(place))
           .slice(0, 20); // Limit to 20 results
       }
 
@@ -400,12 +400,12 @@ export const osmAPI = {
   },
 
   // Transform OSM place data to our format
-  transformOSMPlace(place: any): EyeCareFacility {
+  transformOSMPlace(place: OSMPlace): EyeCareFacility {
     const address = place.address || {};
     const tags = place.extratags || {};
     
     return {
-      place_id: place.place_id || place.osm_id?.toString() || Math.random().toString(),
+      place_id: String(place.place_id || place.osm_id || Math.random()),
       name: place.name || place.display_name?.split(',')[0] || 'Unknown Facility',
       address: place.display_name || this.formatAddress(address),
       phone: tags.phone || tags['contact:phone'] || undefined,
@@ -427,7 +427,7 @@ export const osmAPI = {
   },
 
   // Format address from OSM data
-  formatAddress(address: any): string {
+  formatAddress(address: OSMAddress): string {
     const parts = [];
     if (address.house_number) parts.push(address.house_number);
     if (address.road) parts.push(address.road);
@@ -441,7 +441,7 @@ export const osmAPI = {
   },
 
   // Extract facility types from OSM tags
-  extractTypes(tags: any, address: any): string[] {
+  extractTypes(tags: OSMExtratags, address: OSMAddress): string[] {
     const types = [];
     
     if (tags.amenity) types.push(tags.amenity);
@@ -458,7 +458,7 @@ export const osmAPI = {
   },
 
   // Extract opening hours from OSM tags
-  extractOpeningHours(tags: any): any {
+  extractOpeningHours(tags: OSMExtratags): OpeningHours | undefined {
     if (tags.opening_hours) {
       // Basic parsing of opening hours
       const hours = tags.opening_hours;
@@ -508,8 +508,8 @@ export const osmAPI = {
 
       if (response.data && response.data.elements) {
         return response.data.elements
-          .filter((element: any) => element.tags)
-          .map((element: any) => this.transformOverpassElement(element));
+          .filter((element: OverpassElement) => element.tags)
+          .map((element: OverpassElement) => this.transformOverpassElement(element));
       }
 
       return [];
@@ -521,7 +521,7 @@ export const osmAPI = {
   },
 
   // Transform Overpass element to our format
-  transformOverpassElement(element: any): EyeCareFacility {
+  transformOverpassElement(element: OverpassElement): EyeCareFacility {
     const tags = element.tags || {};
     
     return {
@@ -535,8 +535,8 @@ export const osmAPI = {
       types: this.extractTypes(tags, {}),
       geometry: {
         location: {
-          lat: element.lat || element.center?.lat,
-          lng: element.lon || element.center?.lon,
+          lat: element.lat || element.center?.lat || 0,
+          lng: element.lon || element.center?.lon || 0,
         },
       },
       opening_hours: this.extractOpeningHours(tags),
@@ -547,7 +547,7 @@ export const osmAPI = {
   },
 
   // Format address from Overpass data
-  formatOverpassAddress(element: any): string {
+  formatOverpassAddress(element: OverpassElement): string {
     const tags = element.tags || {};
     const parts = [];
     

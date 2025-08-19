@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { EyeCareFacility, SearchFilters, EnquiryData, GeminiEnquiryResponse } from '@/types';
+import { EyeCareFacility, SearchFilters, EnquiryData, GeminiEnquiryResponse, GooglePlace, Review } from '@/types';
 
 const GOOGLE_PLACES_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY;
 const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
@@ -23,7 +23,7 @@ export const googlePlacesAPI = {
       );
 
       if (response.data.status === 'OK') {
-        return response.data.results.map((place: any) => ({
+        return response.data.results.map((place: GooglePlace) => ({
           place_id: place.place_id,
           name: place.name,
           address: place.formatted_address,
@@ -87,7 +87,7 @@ export const googlePlacesAPI = {
   },
 
   // Get reviews for a facility
-  async getFacilityReviews(placeId: string): Promise<any[]> {
+  async getFacilityReviews(placeId: string): Promise<Review[]> {
     try {
       const response = await axios.get(
         `https://maps.googleapis.com/maps/api/place/details/json`,
@@ -160,8 +160,8 @@ export const geminiAPI = {
       
       // Parse the response to extract subject and body
       const lines = generatedText.split('\n');
-      const subjectLine = lines.find(line => line.toLowerCase().includes('subject:'))?.replace('Subject:', '').trim() || 'Enquiry for Optometrist Position';
-      const emailBody = lines.filter(line => !line.toLowerCase().includes('subject:')).join('\n').trim();
+      const subjectLine = lines.find((line: string) => line.toLowerCase().includes('subject:'))?.replace('Subject:', '').trim() || 'Enquiry for Optometrist Position';
+      const emailBody = lines.filter((line: string) => !line.toLowerCase().includes('subject:')).join('\n').trim();
 
       return {
         subject: subjectLine,

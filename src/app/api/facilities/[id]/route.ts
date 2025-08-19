@@ -3,10 +3,11 @@ import { osmAPI } from '@/lib/free-api';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const placeId = params.id;
+    const resolvedParams = await params;
+    const placeId = resolvedParams.id;
 
     if (!placeId) {
       return NextResponse.json(

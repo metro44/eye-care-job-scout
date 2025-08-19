@@ -77,8 +77,7 @@ export default function EnquiryModal({ isOpen, onClose, facility }: EnquiryModal
     Draft the email subject line and body. Focus on being professional and respectful. The email should be no more than 150 words. Do not include a signature or a closing.`;
 
     // API payload for the LLM call
-    let chatHistory = [];
-    chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+    const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
     const payload = { contents: chatHistory };
     const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
