@@ -34,10 +34,10 @@ export default function FacilityCard({ facility, onGenerateEnquiry }: FacilityCa
         {/* Header */}
         <div className="flex items-start justify-between mb-3 sm:mb-4">
           <div className="flex-1">
-            <h3 className="text-lg sm:text-xl font-bold text-white mb-2 line-clamp-2 group-hover:text-[#D4D8DD] transition-colors">
+            <h3 className="text-lg sm:text-xl font-bold text-white mb-2 line-clamp-2 group-hover:text-warm transition-colors">
               {facility.name}
             </h3>
-            <div className="flex items-center space-x-2 text-[#C0C8CA] mb-2">
+            <div className="flex items-center space-x-2 text-light mb-2">
               <MapPin className="w-4 h-4" />
               <button
                 onClick={(e) => {
@@ -45,22 +45,22 @@ export default function FacilityCard({ facility, onGenerateEnquiry }: FacilityCa
                   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(facility.address)}`;
                   window.open(mapsUrl, '_blank');
                 }}
-                className="text-xs sm:text-sm line-clamp-1 hover:text-[#D4D8DD] transition-colors cursor-pointer underline decoration-dotted flex items-center space-x-1"
+                className="text-xs sm:text-sm line-clamp-1 hover:text-warm transition-colors cursor-pointer underline decoration-dotted flex items-center space-x-1"
                 title="Click to open in Google Maps"
               >
                 <span>{facility.address}</span>
-                <span className="text-[#AAB7B7] text-xs">📍</span>
+                <span className="text-accent text-xs">📍</span>
               </button>
             </div>
           </div>
           
           {/* Rating */}
           {facility.rating && (
-            <div className="flex items-center space-x-1 bg-[#2E4156]/20 px-2 py-1 rounded-lg">
-              <Star className="w-4 h-4 text-[#D4D8DD] fill-current" />
+            <div className="flex items-center space-x-1 bg-secondary/20 px-2 py-1 rounded-lg">
+              <Star className="w-4 h-4 text-warm fill-current" />
               <span className="text-xs sm:text-sm font-medium text-white">{facility.rating}</span>
               {facility.user_ratings_total && (
-                <span className="text-xs text-[#C0C8CA]">({facility.user_ratings_total})</span>
+                <span className="text-xs text-light">({facility.user_ratings_total})</span>
               )}
             </div>
           )}
@@ -72,7 +72,7 @@ export default function FacilityCard({ facility, onGenerateEnquiry }: FacilityCa
             {specialtyTags.map((tag, index) => (
               <span
                 key={index}
-                className="px-2 py-1 text-xs font-medium bg-[#AAB7B7]/20 text-[#C0C8CA] rounded-md border border-[#AAB7B7]/30"
+                className="px-2 py-1 text-xs font-medium bg-accent/20 text-light rounded-md border border-accent/30"
               >
                 {tag}
               </span>
@@ -83,14 +83,14 @@ export default function FacilityCard({ facility, onGenerateEnquiry }: FacilityCa
         {/* Contact Information */}
         <div className="space-y-2 mb-4">
           {facility.phone && (
-            <div className="flex items-center space-x-2 text-[#C0C8CA]">
+            <div className="flex items-center space-x-2 text-light">
               <Phone className="w-4 h-4" />
               <span className="text-sm">{facility.phone}</span>
             </div>
           )}
           
           {facility.website && (
-            <div className="flex items-center space-x-2 text-[#C0C8CA]">
+            <div className="flex items-center space-x-2 text-light">
               <Globe className="w-4 h-4" />
               <span className="text-sm line-clamp-1">{facility.website}</span>
             </div>
@@ -101,8 +101,8 @@ export default function FacilityCard({ facility, onGenerateEnquiry }: FacilityCa
         {facility.opening_hours && (
           <div className="mb-4">
             <div className="flex items-center space-x-2 mb-2">
-              <Clock className="w-4 h-4 text-[#C0C8CA]" />
-              <span className="text-sm font-medium text-[#C0C8CA]">Opening Hours</span>
+              <Clock className="w-4 h-4 text-light" />
+              <span className="text-sm font-medium text-light">Opening Hours</span>
               {facility.opening_hours.open_now !== undefined && (
                 <span className={`text-xs px-2 py-1 rounded-full ${
                   facility.opening_hours.open_now 
@@ -114,7 +114,7 @@ export default function FacilityCard({ facility, onGenerateEnquiry }: FacilityCa
               )}
             </div>
             {facility.opening_hours.weekday_text && (
-              <div className="text-xs text-[#C0C8CA] space-y-1">
+              <div className="text-xs text-light space-y-1">
                 {facility.opening_hours.weekday_text.map((hours, index) => (
                   <div key={index}>{hours}</div>
                 ))}
@@ -125,26 +125,26 @@ export default function FacilityCard({ facility, onGenerateEnquiry }: FacilityCa
 
         {/* Expandable Content */}
         {isExpanded && (
-          <div className="border-t border-[#C0C8CA]/20 pt-4 mt-4">
+          <div className="border-t border-light/20 pt-4 mt-4">
             {/* Reviews */}
             {facility.reviews && facility.reviews.length > 0 && (
               <div className="mb-4">
                 <h4 className="text-sm font-semibold text-white mb-2 flex items-center">
-                  <Star className="w-4 h-4 mr-1 text-[#D4D8DD]" />
+                  <Star className="w-4 h-4 mr-1 text-warm" />
                   Reviews
                 </h4>
                 <div className="space-y-3 max-h-32 overflow-y-auto">
                   {facility.reviews.map((review, index) => (
-                    <div key={index} className="bg-[#2E4156]/10 rounded-lg p-3">
+                    <div key={index} className="bg-secondary/10 rounded-lg p-3">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-sm font-medium text-white">{review.author_name}</span>
                         <div className="flex items-center space-x-1">
-                          <Star className="w-3 h-3 text-[#D4D8DD] fill-current" />
-                          <span className="text-xs text-[#C0C8CA]">{review.rating}</span>
+                          <Star className="w-3 h-3 text-warm fill-current" />
+                          <span className="text-xs text-light">{review.rating}</span>
                         </div>
                       </div>
-                      <p className="text-xs text-[#C0C8CA] line-clamp-2">{review.text}</p>
-                      <span className="text-xs text-[#2E4156]">{review.relative_time_description}</span>
+                      <p className="text-xs text-light line-clamp-2">{review.text}</p>
+                      <span className="text-xs text-secondary">{review.relative_time_description}</span>
                     </div>
                   ))}
                 </div>
@@ -155,14 +155,14 @@ export default function FacilityCard({ facility, onGenerateEnquiry }: FacilityCa
             <div className="grid grid-cols-2 gap-4 text-sm">
               {facility.vicinity && (
                 <div>
-                  <span className="text-[#C0C8CA]">Area:</span>
+                  <span className="text-light">Area:</span>
                   <div className="text-white">{facility.vicinity}</div>
                 </div>
               )}
               
               {facility.geometry?.location && (
                 <div>
-                  <span className="text-[#C0C8CA]">Coordinates:</span>
+                  <span className="text-light">Coordinates:</span>
                   <div className="text-white text-xs">
                     {facility.geometry.location.lat.toFixed(4)}, {facility.geometry.location.lng.toFixed(4)}
                   </div>
@@ -173,7 +173,7 @@ export default function FacilityCard({ facility, onGenerateEnquiry }: FacilityCa
         )}
 
         {/* Action Button */}
-        <div className="mt-4 pt-4 border-t border-[#C0C8CA]/20">
+        <div className="mt-4 pt-4 border-t border-light/20">
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -188,7 +188,7 @@ export default function FacilityCard({ facility, onGenerateEnquiry }: FacilityCa
 
         {/* Expand/Collapse Indicator */}
         <div className="mt-3 text-center">
-          <div className="inline-flex items-center space-x-1 text-[#C0C8CA] text-xs">
+          <div className="inline-flex items-center space-x-1 text-light text-xs">
             <Eye className="w-3 h-3" />
             <span>{isExpanded ? 'Click to collapse' : 'Click to expand'}</span>
           </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { EyeCareFacility, EnquiryData } from '@/types';
 import { X, Send, Copy, Download, User, Briefcase, MessageSquare } from 'lucide-react';
 
@@ -23,6 +23,37 @@ export default function EnquiryModal({ isOpen, onClose, facility }: EnquiryModal
   });
   const [generatedEnquiry, setGeneratedEnquiry] = useState<{ subject: string; enquiry: string } | null>(null);
   const [copied, setCopied] = useState(false);
+
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    // Cleanup function to restore scroll when component unmounts
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
+  // Handle escape key to close modal
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isOpen, onClose]);
 
   const experienceLevels = [
     'Student/Intern',
@@ -171,60 +202,68 @@ export default function EnquiryModal({ isOpen, onClose, facility }: EnquiryModal
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 modal-overlay flex items-center justify-center p-2 sm:p-4">
-      <div className="modal-content rounded-xl max-w-4xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-hidden">
-        {/* Header */}
-        <div className="bg-gradient-secondary p-4 sm:p-6 text-white">
-          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3 min-w-0 flex-1">
-                  <MessageSquare className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
-                  <div className="min-w-0 flex-1">
-                    <h2 className="text-lg sm:text-xl font-bold truncate">Generate Professional Enquiry</h2>
-                    <p className="text-[#C0C8CA] text-xs sm:text-sm truncate">{facility.name}</p>
-                  </div>
-                </div>
-                          <button
-                onClick={onClose}
-                className="text-[#C0C8CA] hover:text-white transition-colors flex-shrink-0 ml-2"
-              >
-              <X className="w-5 h-5 sm:w-6 sm:h-6" />
-            </button>
-          </div>
-        </div>
+    <div 
+      className="fixed inset-0 z-50 modal-overlay flex items-center justify-center p-2 sm:p-4"
+      onClick={(e) => {
+        // Close modal when clicking on overlay
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+    >
+             <div className="modal-content rounded-xl max-w-4xl w-full max-h-[95vh] sm:max-h-[90vh] flex flex-col">
+         {/* Header */}
+         <div className="bg-gradient-secondary p-4 sm:p-6 text-white flex-shrink-0">
+           <div className="flex items-center justify-between">
+                             <div className="flex items-center space-x-3 min-w-0 flex-1">
+                   <MessageSquare className="text-primary w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
+                   <div className="min-w-0 flex-1">
+                     <h2 className="text-primary sm:text-xl font-bold truncate">Generate Professional Enquiry</h2>
+                     <p className="text-light text-xs sm:text-sm truncate">{facility.name}</p>
+                   </div>
+                 </div>
+                           <button
+                 onClick={onClose}
+                 className="text-light hover:text-white transition-colors flex-shrink-0 ml-2"
+               >
+               <X className="w-5 h-5 sm:w-6 sm:h-6" />
+             </button>
+           </div>
+         </div>
 
-        <div className="flex flex-col lg:flex-row h-full">
-          {/* Form Section */}
-          <div className="flex-1 p-4 sm:p-6 bg-white overflow-y-auto">
+         <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
+           {/* Form Section */}
+           <div className="flex-1 p-4 sm:p-6 bg-white overflow-y-auto min-h-0">
             {!generatedEnquiry ? (
               <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                 {/* Experience Level */}
                 <div>
-                  <label className="block text-sm font-medium text-[#1A2D42] mb-2 flex items-center">
+                  <label className="block text-sm font-medium text-primary mb-2 flex items-center">
                     <User className="w-4 h-4 mr-2 flex-shrink-0" />
                     Experience Level
                   </label>
-                  <select
-                    value={enquiryData.userExperience}
-                    onChange={(e) => setEnquiryData(prev => ({ ...prev, userExperience: e.target.value }))}
-                    required
-                    className="input-field w-full"
-                  >
-                    <option value="">Select your experience level</option>
-                    {experienceLevels.map((level) => (
-                      <option key={level} value={level}>{level}</option>
-                    ))}
-                  </select>
+                                     <select
+                     value={enquiryData.userExperience}
+                     onChange={(e) => setEnquiryData(prev => ({ ...prev, userExperience: e.target.value }))}
+                     required
+                     className="input-field w-full text-primary bg-white border-light focus:border-accent focus:ring-accent focus:ring-2"
+                   >
+                     <option value="" className="text-secondary">Select your experience level</option>
+                     {experienceLevels.map((level) => (
+                       <option key={level} value={level} className="text-primary">{level}</option>
+                     ))}
+                   </select>
                 </div>
 
                 {/* Specialties */}
                 <div>
-                  <label className="block text-sm font-medium text-[#1A2D42] mb-2 flex items-center">
+                  <label className="block text-sm font-medium text-primary mb-2 flex items-center">
                     <Briefcase className="w-4 h-4 mr-2 flex-shrink-0" />
                     Specialties (Select all that apply)
                   </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-32 sm:max-h-40 overflow-y-auto p-2 bg-[#2E4156]/5 rounded-lg border border-[#C0C8CA]/20">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-32 sm:max-h-40 overflow-y-auto p-2 bg-secondary/5 rounded-lg border border-light/20 scrollbar-thin scrollbar-thumb-secondary scrollbar-track-transparent">
                     {specialtyOptions.map((specialty) => (
-                      <label key={specialty} className="flex items-center space-x-2 p-2 rounded hover:bg-[#2E4156]/10 transition-colors">
+                      <label key={specialty} className="flex items-center space-x-2 p-2 rounded hover:bg-secondary/10 transition-colors">
                         <input
                           type="checkbox"
                           checked={enquiryData.userSpecialties?.includes(specialty)}
@@ -242,9 +281,9 @@ export default function EnquiryModal({ isOpen, onClose, facility }: EnquiryModal
                               }));
                             }
                           }}
-                          className="rounded border-[#C0C8CA] text-[#2E4156] focus:ring-[#AAB7B7] focus:ring-2"
+                          className="rounded border-light text-secondary focus:ring-accent focus:ring-2"
                         />
-                        <span className="text-sm text-[#1A2D42]">{specialty}</span>
+                        <span className="text-sm text-primary">{specialty}</span>
                       </label>
                     ))}
                   </div>
@@ -252,7 +291,7 @@ export default function EnquiryModal({ isOpen, onClose, facility }: EnquiryModal
 
                 {/* Additional Message */}
                 <div>
-                  <label className="block text-sm font-medium text-[#1A2D42] mb-2">
+                  <label className="block text-sm font-medium text-primary mb-2">
                     Additional Message (Optional)
                   </label>
                   <textarea
@@ -286,14 +325,14 @@ export default function EnquiryModal({ isOpen, onClose, facility }: EnquiryModal
             ) : (
               /* Generated Enquiry Display */
               <div className="space-y-4">
-                <div className="bg-[#2E4156]/10 rounded-lg p-4">
-                  <h3 className="font-semibold text-[#1A2D42] mb-2">Subject:</h3>
-                  <p className="text-[#1A2D42] break-words">{generatedEnquiry.subject}</p>
+                <div className="bg-secondary/10 rounded-lg p-4">
+                  <h3 className="font-semibold text-primary mb-2">Subject:</h3>
+                  <p className="text-primary break-words">{generatedEnquiry.subject}</p>
                 </div>
 
-                <div className="bg-[#2E4156]/10 rounded-lg p-4">
-                  <h3 className="font-semibold text-[#1A2D42] mb-2">Email Body:</h3>
-                  <div className="whitespace-pre-wrap text-[#1A2D42] text-sm leading-relaxed break-words">
+                <div className="bg-secondary/10 rounded-lg p-4">
+                  <h3 className="font-semibold text-primary mb-2">Email Body:</h3>
+                  <div className="whitespace-pre-wrap text-primary text-sm leading-relaxed break-words">
                     {generatedEnquiry.enquiry}
                   </div>
                 </div>
@@ -325,54 +364,54 @@ export default function EnquiryModal({ isOpen, onClose, facility }: EnquiryModal
             )}
           </div>
 
-          {/* Facility Info Sidebar */}
-          <div className="lg:w-80 bg-[#1A2D42] p-4 sm:p-6 text-white overflow-y-auto">
+                     {/* Facility Info Sidebar */}
+           <div className="lg:w-80 bg-primary p-4 sm:p-6 text-white overflow-y-auto flex-shrink-0 min-h-0">
             <h3 className="text-lg font-semibold mb-4">Facility Information</h3>
             <div className="space-y-4">
               <div>
-                <h4 className="font-medium text-[#C0C8CA] mb-1">Name</h4>
+                <h4 className="font-medium text-light mb-1">Name</h4>
                 <p className="text-sm break-words">{facility.name}</p>
               </div>
               
               <div>
-                <h4 className="font-medium text-[#C0C8CA] mb-1">Address</h4>
+                <h4 className="font-medium text-light mb-1">Address</h4>
                 <button
                   onClick={() => {
                     const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(facility.address)}`;
                     window.open(mapsUrl, '_blank');
                   }}
-                  className="text-sm hover:text-[#D4D8DD] transition-colors cursor-pointer underline decoration-dotted text-left flex items-start space-x-1 break-words"
+                  className="text-sm hover:text-warm transition-colors cursor-pointer underline decoration-dotted text-left flex items-start space-x-1 break-words"
                   title="Click to open in Google Maps"
                 >
                   <span>{facility.address}</span>
-                  <span className="text-[#AAB7B7] text-xs flex-shrink-0 mt-0.5">📍</span>
+                  <span className="text-accent text-xs flex-shrink-0 mt-0.5">📍</span>
                 </button>
               </div>
 
               {facility.phone && (
                 <div>
-                  <h4 className="font-medium text-[#C0C8CA] mb-1">Phone</h4>
+                  <h4 className="font-medium text-light mb-1">Phone</h4>
                   <p className="text-sm break-all">{facility.phone}</p>
                 </div>
               )}
 
               {facility.website && (
                 <div>
-                  <h4 className="font-medium text-[#C0C8CA] mb-1">Website</h4>
+                  <h4 className="font-medium text-light mb-1">Website</h4>
                   <p className="text-sm break-all">{facility.website}</p>
                 </div>
               )}
 
               {facility.rating && (
                 <div>
-                  <h4 className="font-medium text-[#C0C8CA] mb-1">Rating</h4>
+                  <h4 className="font-medium text-light mb-1">Rating</h4>
                   <p className="text-sm">{facility.rating}/5 ({facility.user_ratings_total} reviews)</p>
                 </div>
               )}
 
               {facility.opening_hours && (
                 <div>
-                  <h4 className="font-medium text-[#C0C8CA] mb-1">Status</h4>
+                  <h4 className="font-medium text-light mb-1">Status</h4>
                   <p className={`text-sm ${facility.opening_hours.open_now ? 'text-green-400' : 'text-red-400'}`}>
                     {facility.opening_hours.open_now ? 'Open Now' : 'Closed'}
                   </p>
