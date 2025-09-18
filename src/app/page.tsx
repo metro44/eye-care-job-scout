@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { Skeleton } from 'antd';
 import { useQuery } from '@tanstack/react-query';
-import { Search, MapPin, Eye, Star } from 'lucide-react';
+import { Search, MapPin, Eye, Star, Share2, Download } from 'lucide-react';
 import LocationSelector from '@/components/LocationSelector';
 import FacilityCard from '@/components/FacilityCard';
 import EnquiryModal from '@/components/EnquiryModal';
@@ -13,6 +14,8 @@ export default function Home() {
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [selectedFacility, setSelectedFacility] = useState<EyeCareFacility | null>(null);
   const [isEnquiryModalOpen, setIsEnquiryModalOpen] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const pageSize = 9;
 
   // Fetch facilities based on selected location
   const { data: facilities = [], isLoading, error } = useQuery({
@@ -36,6 +39,7 @@ export default function Home() {
 
   const handleLocationSelect = (location: string) => {
     setSelectedLocation(location);
+    setCurrentPage(1);
   };
 
   const handleGenerateEnquiry = (facility: EyeCareFacility) => {
@@ -46,7 +50,7 @@ export default function Home() {
   return (
     <div className="min-h-screen gradient-primary">
       {/* Header */}
-      <header className="glass-dark border-b border-light/20">
+      <header className="glass-dark border-b border-accent">
         <div className="container mx-auto px-4 py-4 sm:py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
             <div className="flex items-center space-x-3">
@@ -55,10 +59,10 @@ export default function Home() {
               </div>
               <div className="text-center sm:text-left">
                 <h1 className="text-xl sm:text-2xl font-bold text-white">Eye Care Job Scout</h1>
-                <p className="text-light text-xs sm:text-sm">Find your next opportunity in eye care</p>
+                <p className="text-secondary text-xs sm:text-sm">Find your next opportunity in eye care</p>
               </div>
             </div>
-            <div className="hidden sm:flex items-center space-x-4 text-light">
+            <div className="hidden sm:flex items-center space-x-4 text-secondary">
               <span className="text-sm">Powered by OpenStreetMap</span>
             </div>
           </div>
@@ -75,7 +79,7 @@ export default function Home() {
         {/* Search Status */}
         {selectedLocation && (
           <div className="mb-6">
-            <div className="flex items-center space-x-2 text-light">
+            <div className="flex items-center space-x-2 text-secondary">
               <MapPin className="w-5 h-5" />
               <span className="font-medium">Searching in: {selectedLocation}</span>
             </div>
@@ -84,28 +88,60 @@ export default function Home() {
 
         {/* Loading State */}
         {isLoading || isSearching ? (
-          <div className="flex flex-col items-center justify-center py-16">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mb-4"></div>
-            <p className="text-light text-lg">Searching for eye care facilities...</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 py-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton active  key={i} className="bg-white rounded-xl medical-border p-6 opacity-60">
+                <div className="animate-pulse">
+                  <div className="flex items-start justify-between mb-6">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-14 h-14 bg-gray-300 rounded-xl"></div>
+                      <div>
+                        <div className="h-5 bg-gray-300 rounded w-32 mb-2"></div>
+                        <div className="h-4 bg-gray-300 rounded w-24"></div>
+                      </div>
+                    </div>
+                    <div className="h-5 bg-gray-300 rounded w-8"></div>
+                  </div>
+                  
+                  <div className="space-y-4 mb-6">
+                    <div className="h-4 bg-gray-300 rounded w-full"></div>
+                    <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+                    <div className="h-4 bg-gray-300 rounded w-1/2"></div>
+                  </div>
+                  
+                  <div className="flex space-x-2 mb-6">
+                    <div className="h-6 bg-gray-300 rounded-full w-16"></div>
+                    <div className="h-6 bg-gray-300 rounded-full w-20"></div>
+                    <div className="h-6 bg-gray-300 rounded-full w-12"></div>
+                  </div>
+                  
+                  <div className="flex space-x-3">
+                    <div className="flex-1 h-10 bg-gray-300 rounded-xl"></div>
+                    <div className="h-10 w-10 bg-gray-300 rounded-xl"></div>
+                    <div className="h-10 w-10 bg-gray-300 rounded-xl"></div>
+                  </div>
+                </div>
+              </Skeleton >
+            ))}
           </div>
         ) : error ? (
           <div className="text-center py-16">
             <div className="glass rounded-xl p-8 max-w-md mx-auto">
-              <div className="w-16 h-16 bg-secondary/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-light rounded-full flex items-center justify-center mx-auto mb-4">
                 <Search className="w-8 h-8 text-secondary" />
               </div>
               <h3 className="text-xl font-semibold text-white mb-2">Search Error</h3>
-              <p className="text-light">Unable to fetch facilities. Please try again.</p>
+              <p className="text-secondary">Unable to fetch facilities. Please try again.</p>
             </div>
           </div>
         ) : facilities.length === 0 && selectedLocation ? (
           <div className="text-center py-16">
             <div className="glass rounded-xl p-8 max-w-md mx-auto">
-              <div className="w-16 h-16 bg-secondary/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-light rounded-full flex items-center justify-center mx-auto mb-4">
                 <Eye className="w-8 h-8 text-secondary" />
               </div>
               <h3 className="text-xl font-semibold text-white mb-2">No Facilities Found</h3>
-              <p className="text-light mb-4">
+              <p className="text-secondary mb-4">
                 No eye care facilities found in {selectedLocation}. Try searching for a different location.
               </p>
               <button
@@ -117,31 +153,70 @@ export default function Home() {
             </div>
           </div>
         ) : facilities.length > 0 ? (
-          <>
-            {/* Results Header */}
-            <div className="mb-6">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0">
-                <h2 className="text-xl sm:text-2xl font-bold text-white">
-                  Found {facilities.length} facilit{facilities.length !== 1 ? 'ies' : 'y'}
-                </h2>
-                <div className="flex items-center space-x-2 text-light">
-                  <Star className="w-4 h-4" />
-                  <span className="text-xs sm:text-sm">Click on any facility to generate an enquiry</span>
+          <section id="facility-results" className="py-20 bg-hospital-gray">
+            <div className="max-w-7xl mx-auto px-5">
+              <div className="flex items-center justify-between mb-12">
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-900">Facility Results</h2>
+                  <p className="text-gray-600 mt-2 font-medium">Found {facilities.length} eye care facilities near you</p>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <button className="flex items-center px-6 py-3 bg-white medical-border rounded-xl text-sm hover:bg-hospital-gray font-semibold hospital-shadow">
+                    <Download className="mr-2 text-primary-blue w-4 h-4" />
+                    Export Results
+                  </button>
+                  <button className="flex items-center px-6 py-3 bg-white medical-border rounded-xl text-sm hover:bg-hospital-gray font-semibold hospital-shadow">
+                    <Share2 className="mr-2 text-primary-blue w-4 h-4" />
+                    Share Search
+                  </button>
                 </div>
               </div>
-            </div>
 
-            {/* Facilities Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {facilities.map((facility: EyeCareFacility) => (
-                <FacilityCard
-                  key={facility.place_id}
-                  facility={facility}
-                  onGenerateEnquiry={handleGenerateEnquiry}
-                />
-              ))}
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                {facilities
+                  .slice((currentPage - 1) * pageSize, currentPage * pageSize)
+                  .map((facility: EyeCareFacility) => (
+                  <FacilityCard
+                    key={facility.place_id}
+                    facility={facility}
+                    onGenerateEnquiry={handleGenerateEnquiry}
+                  />
+                ))}
+              </div>
+
+              <div className="flex items-center justify-center mt-12 space-x-4">
+                {(() => {
+                  const totalPages = Math.max(1, Math.ceil(facilities.length / pageSize));
+                  const goTo = (page: number) => setCurrentPage(Math.min(Math.max(1, page), totalPages));
+                  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+                  const visible = pages.slice(0, Math.min(5, pages.length));
+                  return (
+                    <>
+                      <button className="px-6 py-3 medical-border rounded-xl text-sm hover:bg-white transition-colors disabled:opacity-50 font-semibold" onClick={() => goTo(currentPage - 1)} disabled={currentPage === 1}>
+                        Previous
+                      </button>
+                      <div className="flex space-x-2">
+                        {visible.map((p) => (
+                          <button key={p} className={`px-4 py-3 rounded-xl text-sm font-semibold ${p === currentPage ? 'gradient-bg text-white' : 'medical-border hover:bg-white'}`} onClick={() => goTo(p)}>
+                            {p}
+                          </button>
+                        ))}
+                        {pages.length > visible.length && <span className="px-4 py-3 text-gray-500 text-sm">...</span>}
+                        {pages.length > visible.length && (
+                          <button className="px-4 py-3 medical-border rounded-xl text-sm hover:bg-white font-semibold" onClick={() => goTo(pages.length)}>
+                            {pages.length}
+                          </button>
+                        )}
+                      </div>
+                      <button className="px-6 py-3 medical-border rounded-xl text-sm hover:bg-white font-semibold" onClick={() => goTo(currentPage + 1)} disabled={currentPage === totalPages}>
+                        Next
+                      </button>
+                    </>
+                  );
+                })()}
+              </div>
             </div>
-          </>
+          </section>
         ) : (
           /* Welcome State */
           <div className="text-center py-8 sm:py-16">

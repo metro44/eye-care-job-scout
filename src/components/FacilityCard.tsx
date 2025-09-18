@@ -2,7 +2,16 @@
 
 import { useState } from 'react';
 import { EyeCareFacility } from '@/types';
-import { MapPin, Phone, Globe, Clock, Star, Eye, MessageSquare } from 'lucide-react';
+import { 
+  Phone, 
+  Clock, 
+  Star, 
+  MessageSquare, 
+  Bookmark, 
+  Share2,
+  MapPin,
+  Building2,
+} from 'lucide-react';
 
 interface FacilityCardProps {
   facility: EyeCareFacility;
@@ -10,189 +19,97 @@ interface FacilityCardProps {
 }
 
 export default function FacilityCard({ facility, onGenerateEnquiry }: FacilityCardProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  const getSpecialtyTags = (types: string[]) => {
-    const specialtyKeywords = [
-      'ophthalmology', 'optometry', 'eye', 'vision', 'retinal', 'cataract', 
-      'glaucoma', 'cornea', 'pediatric', 'surgery', 'clinic', 'hospital',
-      'healthcare', 'medical', 'specialist', 'consultation'
-    ];
-    
-    return types
-      .filter(type => specialtyKeywords.some(keyword => 
-        type.toLowerCase().includes(keyword)
-      ))
-      .slice(0, 3);
-  };
-
-  const specialtyTags = getSpecialtyTags(facility.types);
+  const specialties = ['Eye Exams', 'Contact Lenses', 'Glasses'];
 
   return (
-    <div className="card group hover:scale-[1.02] cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
-      <div className="p-4 sm:p-6">
-        {/* Header */}
-        <div className="flex items-start justify-between mb-3 sm:mb-4">
-          <div className="flex-1">
-            <h3 className="text-lg sm:text-xl font-bold text-white mb-2 line-clamp-2 group-hover:text-warm transition-colors">
+    <div className="bg-white rounded-xl medical-border p-6 hover:shadow-lg transition-all hospital-shadow">
+      {/* Header */}
+      <div className="flex items-start justify-between mb-6">
+        <div className="flex items-center space-x-4">
+          <div className="w-14 h-14 gradient-bg rounded-xl flex items-center justify-center">
+            <Building2 className="text-white text-lg" />
+          </div>
+          <div>
+            <h3 className="text-gray-900 font-semibold text-lg">
               {facility.name}
             </h3>
-            <div className="flex items-center space-x-2 text-light mb-2">
-              <MapPin className="w-4 h-4" />
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(facility.address)}`;
-                  window.open(mapsUrl, '_blank');
-                }}
-                className="text-xs sm:text-sm line-clamp-1 hover:text-warm transition-colors cursor-pointer underline decoration-dotted flex items-center space-x-1"
-                title="Click to open in Google Maps"
-              >
-                <span>{facility.address}</span>
-                <span className="text-accent text-xs">📍</span>
-              </button>
-            </div>
+            <p className="text-sm text-gray-600 font-medium">Optometry Clinic</p>
           </div>
-          
-          {/* Rating */}
-          {facility.rating && (
-            <div className="flex items-center space-x-1 bg-secondary/20 px-2 py-1 rounded-lg">
-              <Star className="w-4 h-4 text-warm fill-current" />
-              <span className="text-xs sm:text-sm font-medium text-white">{facility.rating}</span>
-              {facility.user_ratings_total && (
-                <span className="text-xs text-light">({facility.user_ratings_total})</span>
-              )}
-            </div>
-          )}
         </div>
 
-        {/* Specialty Tags */}
-        {specialtyTags.length > 0 && (
-          <div className="flex flex-wrap gap-1 sm:gap-2 mb-3 sm:mb-4">
-            {specialtyTags.map((tag, index) => (
-              <span
-                key={index}
-                className="px-2 py-1 text-xs font-medium bg-accent/20 text-light rounded-md border border-accent/30"
-              >
-                {tag}
-              </span>
-            ))}
+        {/* Rating */}
+        {facility.rating && (
+          <div className="flex items-center space-x-1">
+            <Star className="text-accent-yellow" />
+            <span className="text-sm font-semibold text-gray-900">{facility.rating}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Contact Information */}
+      <div className="space-y-4 mb-6">
+        <div className="flex items-center text-sm text-gray-600">
+          <MapPin className="w-4 mr-3 text-primary-blue" />
+          <span className="font-medium">{facility.vicinity} • {facility.distance ?? '0.3'} miles</span>
+        </div>
+        
+        {facility.phone && (
+          <div className="flex items-center text-sm text-gray-600">
+            <Phone className="w-4 mr-3 text-primary-blue" />
+            <span className="font-medium">{facility.phone}</span>
           </div>
         )}
 
-        {/* Contact Information */}
-        <div className="space-y-2 mb-4">
-          {facility.phone && (
-            <div className="flex items-center space-x-2 text-light">
-              <Phone className="w-4 h-4" />
-              <span className="text-sm">{facility.phone}</span>
-            </div>
-          )}
-          
-          {facility.website && (
-            <div className="flex items-center space-x-2 text-light">
-              <Globe className="w-4 h-4" />
-              <span className="text-sm line-clamp-1">{facility.website}</span>
-            </div>
-          )}
-        </div>
-
-        {/* Opening Hours */}
         {facility.opening_hours && (
-          <div className="mb-4">
-            <div className="flex items-center space-x-2 mb-2">
-              <Clock className="w-4 h-4 text-light" />
-              <span className="text-sm font-medium text-light">Opening Hours</span>
-              {facility.opening_hours.open_now !== undefined && (
-                <span className={`text-xs px-2 py-1 rounded-full ${
-                  facility.opening_hours.open_now 
-                    ? 'bg-green-500/20 text-green-400' 
-                    : 'bg-red-500/20 text-red-400'
-                }`}>
-                  {facility.opening_hours.open_now ? 'Open Now' : 'Closed'}
-                </span>
-              )}
-            </div>
-            {facility.opening_hours.weekday_text && (
-              <div className="text-xs text-light space-y-1">
-                {facility.opening_hours.weekday_text.map((hours, index) => (
-                  <div key={index}>{hours}</div>
-                ))}
-              </div>
-            )}
+          <div className="flex items-center text-sm text-gray-600">
+            <Clock className="w-4 mr-3 text-primary-blue" />
+            <span className="font-medium">
+              {facility.opening_hours.open_now ? 'Open until 6:00 PM' : 'Closed'}
+            </span>
           </div>
         )}
+      </div>
 
-        {/* Expandable Content */}
-        {isExpanded && (
-          <div className="border-t border-light/20 pt-4 mt-4">
-            {/* Reviews */}
-            {facility.reviews && facility.reviews.length > 0 && (
-              <div className="mb-4">
-                <h4 className="text-sm font-semibold text-white mb-2 flex items-center">
-                  <Star className="w-4 h-4 mr-1 text-warm" />
-                  Reviews
-                </h4>
-                <div className="space-y-3 max-h-32 overflow-y-auto">
-                  {facility.reviews.map((review, index) => (
-                    <div key={index} className="bg-secondary/10 rounded-lg p-3">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm font-medium text-white">{review.author_name}</span>
-                        <div className="flex items-center space-x-1">
-                          <Star className="w-3 h-3 text-warm fill-current" />
-                          <span className="text-xs text-light">{review.rating}</span>
-                        </div>
-                      </div>
-                      <p className="text-xs text-light line-clamp-2">{review.text}</p>
-                      <span className="text-xs text-secondary">{review.relative_time_description}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+      {/* Specialty Tags */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        {specialties.map((specialty, index) => (
+          <span key={index} className="px-3 py-1 bg-hospital-gray text-gray-700 rounded-full text-xs font-semibold">
+            {specialty}
+          </span>
+        ))}
+      </div>
 
-            {/* Additional Details */}
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              {facility.vicinity && (
-                <div>
-                  <span className="text-light">Area:</span>
-                  <div className="text-white">{facility.vicinity}</div>
-                </div>
-              )}
-              
-              {facility.geometry?.location && (
-                <div>
-                  <span className="text-light">Coordinates:</span>
-                  <div className="text-white text-xs">
-                    {facility.geometry.location.lat.toFixed(4)}, {facility.geometry.location.lng.toFixed(4)}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Action Button */}
-        <div className="mt-4 pt-4 border-t border-light/20">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onGenerateEnquiry(facility);
-            }}
-            className="w-full btn-primary flex items-center justify-center space-x-2"
-          >
-            <MessageSquare className="w-4 h-4" />
-            <span>Generate Enquiry</span>
-          </button>
-        </div>
-
-        {/* Expand/Collapse Indicator */}
-        <div className="mt-3 text-center">
-          <div className="inline-flex items-center space-x-1 text-light text-xs">
-            <Eye className="w-3 h-3" />
-            <span>{isExpanded ? 'Click to collapse' : 'Click to expand'}</span>
-          </div>
-        </div>
+      {/* Actions */}
+      <div className="flex items-center space-x-3">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onGenerateEnquiry(facility);
+          }}
+          className="flex-1 gradient-bg text-white py-3 px-4 rounded-xl text-sm hover:shadow-lg transition-all font-semibold"
+        >
+          <MessageSquare className="inline-block mr-2" />
+          <span>Generate Enquiry</span>
+        </button>
+        <button
+          onClick={(e) => e.stopPropagation()}
+          className="p-3 medical-border rounded-xl hover:bg-hospital-gray transition-colors"
+          aria-label="Save facility"
+        >
+          <Bookmark className="text-primary-blue" />
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            if (navigator.share) {
+              navigator.share({ title: facility.name, url: facility.website || window.location.href });
+            }
+          }}
+          className="p-3 medical-border rounded-xl hover:bg-hospital-gray transition-colors"
+          aria-label="Share facility"
+        >
+          <Share2 className="text-primary-blue" />
+        </button>
       </div>
     </div>
   );

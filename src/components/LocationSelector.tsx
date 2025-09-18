@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { MapPin, ChevronDown, Search } from 'lucide-react';
+import AnimatedList from '@/components/AnimatedList';
 
 interface LocationSelectorProps {
   onLocationSelect: (location: string) => void;
@@ -38,95 +39,85 @@ export default function LocationSelector({ onLocationSelect }: LocationSelectorP
   };
 
   return (
-    <div className="glass rounded-xl p-4 sm:p-6 shadow-xl">
-              <div className="text-center mb-4 sm:mb-6">
-          <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">Find Eye Care Facilities</h2>
-          <p className="text-light text-sm sm:text-base">Select a location to discover hospitals and clinics</p>
+    <div className="glass rounded-xl p-6 sm:p-8 shadow-2xl bg-white/95 backdrop-blur-sm">
+      <div className="text-center mb-6 sm:mb-8">
+        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-secondary rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-lg">
+          <MapPin className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
         </div>
+        <h2 className="text-2xl sm:text-3xl font-bold text-dark mb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
+          Find Eye Care Facilities
+        </h2>
+        <p className="text-light text-sm sm:text-base">
+          Discover hospitals and clinics in your preferred location
+        </p>
+      </div>
 
-      <div className="space-y-4">
-        {/* Quick Select Dropdown */}
-        <div className="relative">
-          <label className="block text-sm font-medium text-light mb-2">
-            Quick Select Major Cities
-          </label>
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="w-full input-field flex items-center justify-between cursor-pointer"
-            >
-              <span className={selectedLocation ? 'text-primary' : 'text-secondary'}>
-                {selectedLocation || 'Choose a major city...'}
-              </span>
-              <ChevronDown 
-                className={`w-5 h-5 text-secondary transition-transform duration-200 ${
-                  isDropdownOpen ? 'rotate-180' : ''
-                }`} 
-              />
-            </button>
-
-            {isDropdownOpen && (
-              <div className="absolute z-10 w-full mt-1 glass-dark rounded-lg shadow-xl border border-light/20 max-h-48 sm:max-h-60 overflow-y-auto">
-                {MAJOR_CITIES.map((city) => (
-                  <button
-                    key={city}
-                    onClick={() => handleLocationSelect(city)}
-                    className="w-full px-4 py-3 text-left text-light hover:bg-secondary/20 hover:text-white transition-colors duration-200 first:rounded-t-lg last:rounded-b-lg border-b border-light/10 last:border-b-0"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <MapPin className="w-4 h-4 flex-shrink-0" />
-                      <span className="truncate">{city}</span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-light/20"></div>
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-primary text-light">or</span>
-          </div>
-        </div>
-
-        {/* Custom Location Input */}
+      <div className="space-y-6">
+        {/* Search First Approach */}
         <div>
-          <label className="block text-sm font-medium text-light mb-2">
-            Search Any Location
+          <label className="block text-sm font-medium text-dark mb-2 flex items-center">
+            <Search className="w-4 h-4 mr-2 text-primary" />
+            Search Location
           </label>
           <form onSubmit={handleCustomLocationSubmit} className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-secondary" />
+            <div className="relative flex-1 group">
               <input
                 type="text"
                 value={customLocation}
                 onChange={(e) => setCustomLocation(e.target.value)}
                 placeholder="Enter city, state, or country..."
-                className="input-field w-full pl-10"
+                className="input-field w-full pl-4 pr-10 py-3 shadow-sm group-hover:shadow-md transition-shadow duration-200"
               />
+              {/* <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-primary opacity-50 group-hover:opacity-100 transition-opacity duration-200" /> */}
             </div>
             <button
               type="submit"
               disabled={!customLocation.trim()}
-              className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
+              className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto shadow-lg hover:shadow-xl transition-shadow duration-200 py-3 px-6"
             >
               Search
             </button>
           </form>
         </div>
 
+        {/* Divider with Popular Cities Text */}
+        <div className="relative py-2">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-accent"></div>
+          </div>
+          <div className="relative flex justify-center">
+            <span className="px-4 text-sm font-medium text-light bg-white">Popular Cities</span>
+          </div>
+        </div>
+
+        {/* Quick Select Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {MAJOR_CITIES.map((city) => (
+            <button
+              key={city}
+              onClick={() => handleLocationSelect(city)}
+              className={`p-3 rounded-lg text-sm transition-all duration-200 flex items-center justify-center text-center
+                ${selectedLocation === city 
+                  ? 'bg-primary text-white shadow-lg scale-105' 
+                  : 'hover:bg-accent/10 text-light hover:text-primary border border-accent/50 hover:border-primary/30'
+                }`}
+            >
+              {city.split(',')[0]}
+            </button>
+          ))}
+        </div>
+
         {/* Selected Location Display */}
         {selectedLocation && (
-          <div className="mt-4 p-4 bg-gradient-warm rounded-lg border border-light/30">
-            <div className="flex items-center space-x-2">
-              <MapPin className="w-5 h-5 text-primary flex-shrink-0" />
-              <span className="font-medium text-primary truncate">Selected: {selectedLocation}</span>
+          <div className="mt-4 p-4 rounded-lg bg-gradient-to-r from-primary/5 to-secondary/5 border border-primary/20">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 rounded-full bg-primary/10">
+                <MapPin className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <div className="text-xs text-light">Selected Location</div>
+                <div className="font-medium text-dark">{selectedLocation}</div>
+              </div>
             </div>
           </div>
         )}

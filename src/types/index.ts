@@ -7,6 +7,7 @@ export interface EyeCareFacility {
   rating?: number;
   user_ratings_total?: number;
   types: string[];
+  distance?: number;
   geometry: {
     location: {
       lat: number;
