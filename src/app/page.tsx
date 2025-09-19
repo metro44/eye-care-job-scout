@@ -5,7 +5,7 @@ import { Skeleton } from 'antd';
 import { Pagination } from 'antd';
 import { Row, Col } from 'antd';
 import { useQuery } from '@tanstack/react-query';
-import { Search, MapPin, Eye, Star, Share2, Download } from 'lucide-react';
+import { Search, MapPin, Eye, Share2, Download } from 'lucide-react';
 import LocationSelector from '@/components/LocationSelector';
 import FacilityCard from '@/components/FacilityCard';
 import EnquiryModal from '@/components/EnquiryModal';

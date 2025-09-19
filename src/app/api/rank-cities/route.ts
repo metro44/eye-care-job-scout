@@ -40,16 +40,16 @@ export async function POST(req: NextRequest) {
     // Try to parse JSON array from Gemini's response
     let rankedCities: string[] = [];
     try {
-  const match = text.match(/\[[\s\S]*\]/);
+      const match = text.match(/\[[\s\S]*\]/);
       if (match) {
         rankedCities = JSON.parse(match[0]);
       }
-    } catch (e) {
+    } catch (_e) {
       // fallback: return raw text
       rankedCities = [];
     }
     return NextResponse.json({ rankedCities, raw: text });
-  } catch (err) {
+  } catch (_err) {
     return NextResponse.json({ error: 'Failed to rank cities with Gemini' }, { status: 500 });
   }
 }

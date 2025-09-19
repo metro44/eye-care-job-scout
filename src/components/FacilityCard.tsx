@@ -1,12 +1,9 @@
 'use client';
-
-import { useState } from 'react';
 import { EyeCareFacility } from '@/types';
 import { 
   Phone, 
   Clock, 
   Star, 
-  MessageSquare, 
   Bookmark, 
   Share2,
   MapPin,

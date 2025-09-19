@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Lottie from 'lottie-react';
-import { MapPin, ChevronDown, Search } from 'lucide-react';
-import AnimatedList from '@/components/AnimatedList';
+import { MapPin, Search } from 'lucide-react';
 
 interface LocationSelectorProps {
   onLocationSelect: (location: string) => void;
@@ -14,7 +13,7 @@ interface LocationSelectorProps {
 
 
 export default function LocationSelector({ onLocationSelect }: LocationSelectorProps) {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  // Dropdown state was unused in UI; removed to satisfy linter
   const [customLocation, setCustomLocation] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
   const [userCountry, setUserCountry] = useState<string>('Nigeria');
@@ -22,7 +21,7 @@ export default function LocationSelector({ onLocationSelect }: LocationSelectorP
   const [popularCities, setPopularCities] = useState<string[]>([]);
   const [loadingCities, setLoadingCities] = useState<boolean>(false);
   const [cityError, setCityError] = useState<string | null>(null);
-  const [cityAnimation, setCityAnimation] = useState<any | null>(null);
+  const [cityAnimation, setCityAnimation] = useState<Record<string, unknown> | null>(null);
 
   // Detect user's country using browser geolocation and reverse-geocoding
   useEffect(() => {
@@ -52,7 +51,7 @@ export default function LocationSelector({ onLocationSelect }: LocationSelectorP
           (position) => {
             fetchCountryFromCoords(position.coords.latitude, position.coords.longitude);
           },
-          async (error) => {
+          async (_error) => {
             // If denied or error, fallback to IP-based
             try {
               const res = await fetch('https://ipapi.co/json/');
@@ -65,7 +64,7 @@ export default function LocationSelector({ onLocationSelect }: LocationSelectorP
                 }
                 return;
               }
-            } catch (err) {
+            } catch (_err) {
               // fallback below
             }
             // setUserCountry('Nigeria');
@@ -107,7 +106,7 @@ export default function LocationSelector({ onLocationSelect }: LocationSelectorP
         }
         // Use Wikidata population order, limit to 8 for UI
         setPopularCities(data.cities.slice(0, 8));
-      } catch (err) {
+      } catch (_err) {
         setPopularCities([]);
         setCityError('Could not fetch popular cities.');
       } finally {
@@ -119,7 +118,6 @@ export default function LocationSelector({ onLocationSelect }: LocationSelectorP
 
   const handleLocationSelect = (location: string) => {
     setSelectedLocation(location);
-    setIsDropdownOpen(false);
     onLocationSelect(location);
   };
 

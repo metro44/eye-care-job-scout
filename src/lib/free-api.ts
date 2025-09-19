@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { EyeCareFacility, SearchFilters, EnquiryData, GeminiEnquiryResponse, OSMPlace, OSMAddress, OSMExtratags, OpeningHours, OverpassElement, OverpassResponse } from '@/types';
+import { EyeCareFacility, SearchFilters, EnquiryData, GeminiEnquiryResponse, OSMPlace, OSMAddress, OSMExtratags, OpeningHours, OverpassElement } from '@/types';
 
 // Real facility data for major cities (this is real data, not mock)
 const REAL_FACILITIES: { [key: string]: EyeCareFacility[] } = {
