@@ -52,8 +52,9 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Wikidata error', status: wdRes.status, text }, { status: 500 });
     }
     const wdData = await wdRes.json();
+    type WikidataBinding = { cityLabel?: { value?: string } };
     const cityNames: string[] = (wdData.results.bindings || [])
-      .map((b: any) => (b.cityLabel && b.cityLabel.value ? String(b.cityLabel.value).trim() : ''))
+      .map((b: WikidataBinding) => (b.cityLabel && b.cityLabel.value ? String(b.cityLabel.value).trim() : ''))
       .filter((n: string) => n.length > 0);
     const uniqueCityNames = Array.from(new Set(cityNames)).slice(0, 20);
     return NextResponse.json({
