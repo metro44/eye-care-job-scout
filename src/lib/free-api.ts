@@ -249,6 +249,11 @@ export const osmAPI = {
         `eye ${filters.location}`,
         `medical ${filters.location}`,
         `healthcare ${filters.location}`,
+        `eye hospital ${filters.location}`,
+        `eye clinic ${filters.location}`,
+        `vision center ${filters.location}`,
+        `ophthalmic ${filters.location}`,
+        `optician ${filters.location}`,
       ];
 
       let allResults: OSMPlace[] = [];
@@ -262,7 +267,7 @@ export const osmAPI = {
               params: {
                 q: query,
                 format: 'json',
-                limit: 10,
+                limit: 20,
                 addressdetails: 1,
                 extratags: 1,
                 namedetails: 1,
@@ -328,8 +333,7 @@ export const osmAPI = {
 
             return isMedical || hasMedicalKeywords;
           })
-          .map((place: OSMPlace) => this.transformOSMPlace(place))
-          .slice(0, 15); // Limit OSM results to 15 to leave room for real facilities
+          .map((place: OSMPlace) => this.transformOSMPlace(place));
       }
 
       // Combine OSM results with real facilities, prioritizing real facilities
@@ -357,8 +361,11 @@ export const osmAPI = {
         }
       }
 
-      console.log(`Returning ${uniqueCombinedResults.length} total facilities (${realFacilities.length} real + ${osmResults.length} OSM)`);
-      return uniqueCombinedResults.slice(0, 25); // Return up to 25 total results
+      const maxDefault = 25;
+      const requestedLimit = filters.limit && Number.isFinite(filters.limit) ? Math.max(1, Math.min(100, filters.limit)) : maxDefault;
+      const finalLimit = Math.min(requestedLimit, 100);
+      console.log(`Returning ${Math.min(uniqueCombinedResults.length, finalLimit)} total facilities (${realFacilities.length} real + ${osmResults.length} OSM), limit=${finalLimit}`);
+      return uniqueCombinedResults.slice(0, finalLimit); // Return up to requested limit (capped)
     } catch (error) {
       console.error('Error searching facilities:', error);
       

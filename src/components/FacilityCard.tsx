@@ -22,15 +22,19 @@ export default function FacilityCard({ facility, onGenerateEnquiry }: FacilityCa
   const specialties = ['Eye Exams', 'Contact Lenses', 'Glasses'];
 
   return (
-    <div className="bg-white rounded-xl medical-border p-6 hover:shadow-lg transition-all hospital-shadow">
+    <div className="bg-white rounded-xl medical-border p-6 hover:shadow-lg transition-all hospital-shadow h-full min-h-[360px] flex flex-col">
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div className="flex items-center space-x-4">
           <div className="w-14 h-14 gradient-bg rounded-xl flex items-center justify-center">
             <Building2 className="text-white text-lg" />
           </div>
-          <div>
-            <h3 className="text-gray-900 font-semibold text-lg">
+          <div className="min-h-[56px]">
+            <h3
+              className="text-gray-900 font-semibold text-lg"
+              style={{ display: '-webkit-box', WebkitLineClamp: 2 as unknown as number, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+              title={facility.name}
+            >
               {facility.name}
             </h3>
             <p className="text-sm text-gray-600 font-medium">Optometry Clinic</p>
@@ -50,7 +54,9 @@ export default function FacilityCard({ facility, onGenerateEnquiry }: FacilityCa
       <div className="space-y-4 mb-6">
         <div className="flex items-center text-sm text-gray-600">
           <MapPin className="w-4 mr-3 text-primary-blue" />
-          <span className="font-medium">{facility.vicinity} • {facility.distance ?? '0.3'} miles</span>
+          <div className="font-medium truncate" title={`${facility.vicinity} • ${facility.distance ?? '0.3'} miles`}>
+            {facility.vicinity} • {facility.distance ?? '0.3'} miles
+          </div>
         </div>
         
         {facility.phone && (
@@ -71,7 +77,7 @@ export default function FacilityCard({ facility, onGenerateEnquiry }: FacilityCa
       </div>
 
       {/* Specialty Tags */}
-      <div className="flex flex-wrap gap-2 mb-6">
+      <div className="flex flex-wrap gap-2 mb-6 min-h-[40px]">
         {specialties.map((specialty, index) => (
           <span key={index} className="px-3 py-1 bg-hospital-gray text-gray-700 rounded-full text-xs font-semibold">
             {specialty}
@@ -80,16 +86,15 @@ export default function FacilityCard({ facility, onGenerateEnquiry }: FacilityCa
       </div>
 
       {/* Actions */}
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center space-x-3 mt-auto">
         <button
           onClick={(e) => {
             e.stopPropagation();
             onGenerateEnquiry(facility);
           }}
-          className="flex-1 gradient-bg text-white py-3 px-4 rounded-xl text-sm hover:shadow-lg transition-all font-semibold"
+          className="p-3 medical-border rounded-xl hover:bg-hospital-gray transition-colors flex items-center justify-center"
         >
-          <MessageSquare className="inline-block mr-2" />
-          <span>Generate Enquiry</span>
+          <span className="text-primary-blue font-semibold">Generate Enquiry</span>
         </button>
         <button
           onClick={(e) => e.stopPropagation()}

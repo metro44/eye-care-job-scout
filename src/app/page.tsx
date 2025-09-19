@@ -1,7 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Skeleton } from 'antd';
+import { Pagination } from 'antd';
+import { Row, Col } from 'antd';
 import { useQuery } from '@tanstack/react-query';
 import { Search, MapPin, Eye, Star, Share2, Download } from 'lucide-react';
 import LocationSelector from '@/components/LocationSelector';
@@ -15,10 +17,20 @@ export default function Home() {
   const [selectedFacility, setSelectedFacility] = useState<EyeCareFacility | null>(null);
   const [isEnquiryModalOpen, setIsEnquiryModalOpen] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const pageSize = 9;
+  const pageSize = 12;
+
+  // Initialize selectedLocation from URL (?location=...)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const fromUrl = params.get('location');
+    if (fromUrl) {
+      setSelectedLocation(fromUrl);
+    }
+  }, []);
 
   // Fetch facilities based on selected location
-  const { data: facilities = [], isLoading, error } = useQuery({
+  const { data: facilities = [], isLoading, error } = useQuery<EyeCareFacility[]>({
     queryKey: ['facilities', selectedLocation],
     queryFn: async () => {
       if (!selectedLocation) return [];
@@ -26,7 +38,7 @@ export default function Home() {
       try {
         const response = await fetch(`/api/facilities?location=${encodeURIComponent(selectedLocation)}&minRating=0`);
         const data = await response.json();
-        return data.facilities || [];
+        return (data.facilities || []) as EyeCareFacility[];
       } catch (error) {
         console.error('Error fetching facilities:', error);
         return [];
@@ -40,11 +52,114 @@ export default function Home() {
   const handleLocationSelect = (location: string) => {
     setSelectedLocation(location);
     setCurrentPage(1);
+    // Sync query param for shareable URLs
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      if (location) {
+        url.searchParams.set('location', location);
+      } else {
+        url.searchParams.delete('location');
+      }
+      window.history.replaceState(null, '', url.toString());
+    }
   };
 
   const handleGenerateEnquiry = (facility: EyeCareFacility) => {
     setSelectedFacility(facility);
     setIsEnquiryModalOpen(true);
+  };
+
+  const handleExportResults = () => {
+    try {
+      if (!facilities || facilities.length === 0) {
+        alert('No results to export.');
+        return;
+      }
+      const headers = [
+        'name',
+        'address',
+        'phone',
+        'website',
+        'rating',
+        'user_ratings_total',
+        'types',
+        'distance_km',
+        'lat',
+        'lng',
+      ];
+      const rows: string[][] = facilities.map((f: EyeCareFacility) => [
+        f.name ?? '',
+        f.address ?? f.vicinity ?? '',
+        f.phone ?? '',
+        f.website ?? '',
+        typeof f.rating === 'number' ? String(f.rating) : '',
+        typeof f.user_ratings_total === 'number' ? String(f.user_ratings_total) : '',
+        Array.isArray(f.types) ? f.types.join('|') : '',
+        typeof f.distance === 'number' ? String(f.distance) : '',
+        f.geometry?.location?.lat != null ? String(f.geometry.location.lat) : '',
+        f.geometry?.location?.lng != null ? String(f.geometry.location.lng) : '',
+      ]);
+      const csv = [headers, ...rows]
+        .map((r: string[]) => r.map((cell: string) => {
+          const value = String(cell ?? '');
+          if (/[",\n]/.test(value)) {
+            return '"' + value.replace(/"/g, '""') + '"';
+          }
+          return value;
+        }).join(','))
+        .join('\n');
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const date = new Date().toISOString().slice(0, 10);
+      const locPart = selectedLocation ? `_${selectedLocation.replace(/\s+/g, '_')}` : '';
+      link.href = url;
+      link.download = `eye_care_facilities${locPart}_${date}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Failed to export CSV', err);
+      alert('Failed to export results.');
+    }
+  };
+
+  const handleShareSearch = async () => {
+    if (typeof window === 'undefined') return;
+    const shareUrl = (() => {
+      const u = new URL(window.location.href);
+      if (selectedLocation) {
+        u.searchParams.set('location', selectedLocation);
+      }
+      return u.toString();
+    })();
+    const shareData = {
+      title: 'Eye Care Job Scout',
+      text: selectedLocation ? `Eye care facilities near ${selectedLocation}` : 'Eye care facilities search',
+      url: shareUrl,
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+        alert('Link copied to clipboard!');
+      } else {
+        // Fallback
+        const textarea = document.createElement('textarea');
+        textarea.value = shareUrl;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        alert('Link copied to clipboard!');
+      }
+    } catch (err) {
+      console.error('Share failed', err);
+      alert('Unable to share the search.');
+    }
   };
 
   return (
@@ -155,65 +270,46 @@ export default function Home() {
         ) : facilities.length > 0 ? (
           <section id="facility-results" className="py-20 bg-hospital-gray">
             <div className="max-w-7xl mx-auto px-5">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-12 space-y-4 sm:space-y-0">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 sm:justify-between mb-12 space-y-4 sm:space-y-0">
                 <div>
                   <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Facility Results</h2>
                   <p className="text-gray-600 mt-2 font-medium text-sm sm:text-base">Found {facilities.length} eye care facilities near you</p>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:items-center w-full sm:w-auto space-y-3 sm:space-y-0 sm:space-x-4">
-                  <button className="flex items-center justify-center px-6 py-3 bg-white medical-border rounded-xl text-sm hover:bg-hospital-gray font-semibold hospital-shadow w-full sm:w-auto">
+                  <button onClick={handleExportResults} className="flex items-center justify-center px-6 py-3 bg-white medical-border rounded-xl text-sm hover:bg-hospital-gray font-semibold hospital-shadow w-full sm:w-auto">
                     <Download className="mr-2 text-primary-blue w-4 h-4" />
                     Export Results
                   </button>
-                  <button className="flex items-center justify-center px-6 py-3 bg-white medical-border rounded-xl text-sm hover:bg-hospital-gray font-semibold hospital-shadow w-full sm:w-auto">
+                  <button onClick={handleShareSearch} className="flex items-center justify-center px-6 py-3 bg-white medical-border rounded-xl text-sm hover:bg-hospital-gray font-semibold hospital-shadow w-full sm:w-auto">
                     <Share2 className="mr-2 text-primary-blue w-4 h-4" />
                     Share Search
                   </button>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+              <Row gutter={[16, 16]} align="stretch">
                 {facilities
                   .slice((currentPage - 1) * pageSize, currentPage * pageSize)
                   .map((facility: EyeCareFacility) => (
-                  <FacilityCard
-                    key={facility.place_id}
-                    facility={facility}
-                    onGenerateEnquiry={handleGenerateEnquiry}
-                  />
+                  <Col key={facility.place_id} span={6}>
+                    <FacilityCard
+                      facility={facility}
+                      onGenerateEnquiry={handleGenerateEnquiry}
+                    />
+                  </Col>
                 ))}
-              </div>
+              </Row>
 
-              <div className="flex items-center justify-center mt-12 space-x-4">
-                {(() => {
-                  const totalPages = Math.max(1, Math.ceil(facilities.length / pageSize));
-                  const goTo = (page: number) => setCurrentPage(Math.min(Math.max(1, page), totalPages));
-                  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
-                  const visible = pages.slice(0, Math.min(5, pages.length));
-                  return (
-                    <>
-                      <button className="px-6 py-3 medical-border rounded-xl text-sm hover:bg-white transition-colors disabled:opacity-50 font-semibold" onClick={() => goTo(currentPage - 1)} disabled={currentPage === 1}>
-                        Previous
-                      </button>
-                      <div className="flex space-x-2">
-                        {visible.map((p) => (
-                          <button key={p} className={`px-4 py-3 rounded-xl text-sm font-semibold ${p === currentPage ? 'gradient-bg text-white' : 'medical-border hover:bg-white'}`} onClick={() => goTo(p)}>
-                            {p}
-                          </button>
-                        ))}
-                        {pages.length > visible.length && <span className="px-4 py-3 text-gray-500 text-sm">...</span>}
-                        {pages.length > visible.length && (
-                          <button className="px-4 py-3 medical-border rounded-xl text-sm hover:bg-white font-semibold" onClick={() => goTo(pages.length)}>
-                            {pages.length}
-                          </button>
-                        )}
-                      </div>
-                      <button className="px-6 py-3 medical-border rounded-xl text-sm hover:bg-white font-semibold" onClick={() => goTo(currentPage + 1)} disabled={currentPage === totalPages}>
-                        Next
-                      </button>
-                    </>
-                  );
-                })()}
+              <div className="flex items-center justify-center mt-20 gap-4 sm:gap-6 py-4">
+                <Pagination
+                  align="center"
+                  current={currentPage}
+                  defaultCurrent={1}
+                  total={facilities.length}
+                  pageSize={pageSize}
+                  showSizeChanger={false}
+                  onChange={(page) => setCurrentPage(page)}
+                />
               </div>
             </div>
           </section>

@@ -50,6 +50,7 @@ export interface SearchFilters {
   radius?: number;
   type?: string;
   minRating?: number;
+  limit?: number;
 }
 
 export interface EnquiryData {

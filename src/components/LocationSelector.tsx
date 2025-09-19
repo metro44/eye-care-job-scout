@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Lottie from 'lottie-react';
 import { MapPin, ChevronDown, Search } from 'lucide-react';
 import AnimatedList from '@/components/AnimatedList';
 
@@ -21,6 +22,7 @@ export default function LocationSelector({ onLocationSelect }: LocationSelectorP
   const [popularCities, setPopularCities] = useState<string[]>([]);
   const [loadingCities, setLoadingCities] = useState<boolean>(false);
   const [cityError, setCityError] = useState<string | null>(null);
+  const [cityAnimation, setCityAnimation] = useState<any | null>(null);
 
   // Detect user's country using browser geolocation and reverse-geocoding
   useEffect(() => {
@@ -40,8 +42,8 @@ export default function LocationSelector({ onLocationSelect }: LocationSelectorP
       } catch (err) {
         // fallback below
       }
-      setUserCountry('Nigeria');
-      setUserCountryCode('NG');
+      // setUserCountry('Nigeria');
+      // setUserCountryCode('NG');
     }
 
     function detectCountry() {
@@ -66,17 +68,25 @@ export default function LocationSelector({ onLocationSelect }: LocationSelectorP
             } catch (err) {
               // fallback below
             }
-            setUserCountry('Nigeria');
-            setUserCountryCode('NG');
+            // setUserCountry('Nigeria');
+            // setUserCountryCode('NG');
           },
           { timeout: 5000 }
         );
       } else {
-        setUserCountry('Nigeria');
-        setUserCountryCode('NG');
+        // setUserCountry('Nigeria');
+        // setUserCountryCode('NG');
       }
     }
     detectCountry();
+  }, []);
+
+  // Load Lottie animation (City Skyline)
+  useEffect(() => {
+    fetch(encodeURI('/animations/City Skyline.json'))
+      .then((res) => res.json())
+      .then(setCityAnimation)
+      .catch(() => setCityAnimation(null));
   }, []);
 
   // Fetch popular cities from backend (Wikidata) when userCountry changes
@@ -122,10 +132,14 @@ export default function LocationSelector({ onLocationSelect }: LocationSelectorP
   };
 
   return (
-    <div className="glass rounded-xl p-6 sm:p-8 shadow-2xl bg-white/95 backdrop-blur-sm">
+    <div className="rounded-xl sm:p-8 bg-hospital-gray">
       <div className="text-center mb-6 sm:mb-8">
-        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-secondary rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-lg">
-          <MapPin className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
+        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-secondary rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 overflow-hidden">
+          {cityAnimation ? (
+            <Lottie animationData={cityAnimation} loop autoplay style={{ width: '20%', height: '20%' }} />
+          ) : (
+            <MapPin className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
+          )}
         </div>
         <h2 className="text-2xl sm:text-3xl font-bold text-dark mb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
           Find Eye Care Facilities
@@ -169,7 +183,7 @@ export default function LocationSelector({ onLocationSelect }: LocationSelectorP
             <div className="w-full border-t border-accent"></div>
           </div>
           <div className="relative flex justify-center">
-            <span className="px-4 text-sm font-medium text-light bg-white">Popular Cities</span>
+            <span className="px-4 text-sm font-medium text-light">Popular Cities</span>
           </div>
         </div>
 

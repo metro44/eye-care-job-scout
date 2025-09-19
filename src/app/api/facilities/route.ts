@@ -9,6 +9,7 @@ export async function GET(request: NextRequest) {
     const radius = searchParams.get('radius');
     const type = searchParams.get('type');
     const minRating = searchParams.get('minRating');
+  const limit = searchParams.get('limit');
 
     if (!location) {
       return NextResponse.json(
@@ -22,6 +23,7 @@ export async function GET(request: NextRequest) {
       radius: radius ? parseInt(radius) : undefined,
       type: type || undefined,
       minRating: minRating ? parseFloat(minRating) : undefined,
+    limit: limit ? Math.max(1, Math.min(100, parseInt(limit))) : undefined,
     };
 
     // Use OSM API (completely free, no API key needed)
