@@ -155,17 +155,17 @@ export default function Home() {
         ) : facilities.length > 0 ? (
           <section id="facility-results" className="py-20 bg-hospital-gray">
             <div className="max-w-7xl mx-auto px-5">
-              <div className="flex items-center justify-between mb-12">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-12 space-y-4 sm:space-y-0">
                 <div>
-                  <h2 className="text-3xl font-bold text-gray-900">Facility Results</h2>
-                  <p className="text-gray-600 mt-2 font-medium">Found {facilities.length} eye care facilities near you</p>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Facility Results</h2>
+                  <p className="text-gray-600 mt-2 font-medium text-sm sm:text-base">Found {facilities.length} eye care facilities near you</p>
                 </div>
-                <div className="flex items-center space-x-4">
-                  <button className="flex items-center px-6 py-3 bg-white medical-border rounded-xl text-sm hover:bg-hospital-gray font-semibold hospital-shadow">
+                <div className="flex flex-col sm:flex-row sm:items-center w-full sm:w-auto space-y-3 sm:space-y-0 sm:space-x-4">
+                  <button className="flex items-center justify-center px-6 py-3 bg-white medical-border rounded-xl text-sm hover:bg-hospital-gray font-semibold hospital-shadow w-full sm:w-auto">
                     <Download className="mr-2 text-primary-blue w-4 h-4" />
                     Export Results
                   </button>
-                  <button className="flex items-center px-6 py-3 bg-white medical-border rounded-xl text-sm hover:bg-hospital-gray font-semibold hospital-shadow">
+                  <button className="flex items-center justify-center px-6 py-3 bg-white medical-border rounded-xl text-sm hover:bg-hospital-gray font-semibold hospital-shadow w-full sm:w-auto">
                     <Share2 className="mr-2 text-primary-blue w-4 h-4" />
                     Share Search
                   </button>

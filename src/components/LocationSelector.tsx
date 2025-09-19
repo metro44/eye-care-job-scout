@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MapPin, ChevronDown, Search } from 'lucide-react';
 import AnimatedList from '@/components/AnimatedList';
 
@@ -8,21 +8,104 @@ interface LocationSelectorProps {
   onLocationSelect: (location: string) => void;
 }
 
-const MAJOR_CITIES = [
-  'Lagos, Nigeria',
-  'Abuja, Nigeria',
-  'Port Harcourt, Nigeria',
-  'Kano, Nigeria',
-  'Ibadan, Nigeria',
-  'Kaduna, Nigeria',
-  'Enugu, Nigeria',
-  'Calabar, Nigeria',
-];
+
+
+
 
 export default function LocationSelector({ onLocationSelect }: LocationSelectorProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [customLocation, setCustomLocation] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
+  const [userCountry, setUserCountry] = useState<string>('Nigeria');
+  const [userCountryCode, setUserCountryCode] = useState<string>('NG');
+  const [popularCities, setPopularCities] = useState<string[]>([]);
+  const [loadingCities, setLoadingCities] = useState<boolean>(false);
+  const [cityError, setCityError] = useState<string | null>(null);
+
+  // Detect user's country using browser geolocation and reverse-geocoding
+  useEffect(() => {
+    async function fetchCountryFromCoords(lat: number, lon: number) {
+      try {
+        // Use Nominatim reverse geocoding
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
+        if (!res.ok) throw new Error('Failed to reverse geocode');
+        const data = await res.json();
+        if (data && data.address && data.address.country) {
+          setUserCountry(data.address.country);
+          if (data.address.country_code) {
+            setUserCountryCode(data.address.country_code.toUpperCase());
+          }
+          return;
+        }
+      } catch (err) {
+        // fallback below
+      }
+      setUserCountry('Nigeria');
+      setUserCountryCode('NG');
+    }
+
+    function detectCountry() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            fetchCountryFromCoords(position.coords.latitude, position.coords.longitude);
+          },
+          async (error) => {
+            // If denied or error, fallback to IP-based
+            try {
+              const res = await fetch('https://ipapi.co/json/');
+              if (!res.ok) throw new Error('Failed to fetch country');
+              const data = await res.json();
+              if (data && data.country_name) {
+                setUserCountry(data.country_name);
+                if (data.country_code) {
+                  setUserCountryCode(data.country_code.toUpperCase());
+                }
+                return;
+              }
+            } catch (err) {
+              // fallback below
+            }
+            setUserCountry('Nigeria');
+            setUserCountryCode('NG');
+          },
+          { timeout: 5000 }
+        );
+      } else {
+        setUserCountry('Nigeria');
+        setUserCountryCode('NG');
+      }
+    }
+    detectCountry();
+  }, []);
+
+  // Fetch popular cities from backend (Wikidata) when userCountry changes
+  useEffect(() => {
+    if (!userCountryCode) return;
+    setLoadingCities(true);
+    setCityError(null);
+    async function fetchCities() {
+      try {
+        // Fetch top cities by population
+        const res = await fetch(`/api/popular-cities?countryCode=${userCountryCode}`);
+        const data = await res.json();
+        if (!data.cities || data.cities.length === 0) {
+          setPopularCities([]);
+          setCityError('No cities found for your country.');
+          setLoadingCities(false);
+          return;
+        }
+        // Use Wikidata population order, limit to 8 for UI
+        setPopularCities(data.cities.slice(0, 8));
+      } catch (err) {
+        setPopularCities([]);
+        setCityError('Could not fetch popular cities.');
+      } finally {
+        setLoadingCities(false);
+      }
+    }
+    fetchCities();
+  }, [userCountryCode]);
 
   const handleLocationSelect = (location: string) => {
     setSelectedLocation(location);
@@ -90,21 +173,32 @@ export default function LocationSelector({ onLocationSelect }: LocationSelectorP
           </div>
         </div>
 
-        {/* Quick Select Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          {MAJOR_CITIES.map((city) => (
-            <button
-              key={city}
-              onClick={() => handleLocationSelect(city)}
-              className={`p-3 rounded-lg text-sm transition-all duration-200 flex items-center justify-center text-center
-                ${selectedLocation === city 
-                  ? 'bg-primary text-white shadow-lg scale-105' 
-                  : 'hover:bg-accent/10 text-light hover:text-primary border border-accent/50 hover:border-primary/30'
-                }`}
-            >
-              {city.split(',')[0]}
-            </button>
-          ))}
+        {/* Quick Select Grid (Dynamic) */}
+        <div className="min-h-[56px]">
+          {loadingCities ? (
+            <div className="text-center text-light">Loading popular cities...</div>
+          ) : cityError ? (
+            <div className="text-center text-light">{cityError}</div>
+          ) : popularCities.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {popularCities.map((city) => {
+                const formattedCity = `${city}, ${userCountry}`;
+                return (
+                  <button
+                    key={city}
+                    onClick={() => handleLocationSelect(formattedCity)}
+                    className={`p-3 rounded-lg text-sm transition-all duration-200 flex items-center justify-center text-center
+                      ${selectedLocation === formattedCity 
+                        ? 'bg-primary text-white shadow-lg scale-105' 
+                        : 'hover:bg-accent/10 text-light hover:text-primary border border-accent/50 hover:border-primary/30'
+                      }`}
+                  >
+                    {city.split(',')[0]}
+                  </button>
+                );
+              })}
+            </div>
+          ) : null}
         </div>
 
         {/* Selected Location Display */}
